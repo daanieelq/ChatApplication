@@ -11,7 +11,7 @@ public class RoundedButton implements Border {
 
     @Override
     public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
-        g.drawRect(x, y, width - 1, height - 1);
+        g.drawRect(x, y, width - 1, height - 1;
     }
 
     @Override
