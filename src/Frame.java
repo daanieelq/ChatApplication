@@ -1,145 +1,109 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.geom.RoundRectangle2D;
 import java.io.File;
 import java.io.IOException;
 
 public class Frame {
+    ChatBubble chatBubble;
+    JFrame frame;
+    JScrollPane scrollPanel;
+    CloseButton closeButton;
+    MinimizeButton minimizeButton;
+    TextField textField;
+    SendButton sendButton;
+    JLabel chatWindow;
+
+    Font Montserrat;
+
     int spaces = 20;
     int windowHeight = 800;
     int windowWidth = 600;
-    int chatWindowHeight = windowHeight - spaces ;
-    int chatWindowWidth = windowWidth - spaces;
-    int sendButtonHeight = ;
-    int sendButtonWidth;
-    int textBoxHeight;
-    int textBoxWidth;
-    String userInput;
-    int key;
+    public String userInput;
 
 
-    JFrame frame;
-    JPanel panel;
-    JButton sendButton;
-    JTextField text;
-    JLabel chatWindow;
-    Font Montserrat;
+    ImageIcon chatIcon = new ImageIcon("src\\assets\\icon.png");
 
 
-
-    ImageIcon img = new ImageIcon("src\\icon.png");
-
-    public Frame() {
+    public Frame() throws IOException {
         frame = new JFrame("Chat Application");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.setSize(windowWidth,windowHeight);
+        frame.setSize(windowWidth, windowHeight);
         frame.setLocationRelativeTo(null);
         frame.setResizable(false);
-        frame.setIconImage(img.getImage());
-
-
-        panel = new JPanel(new BorderLayout());
-        panel.setLayout(null);
-        panel.setBackground(Color.decode("#121212"));
-
-
-        text = new RoundTextField(0);
-        text.setPreferredSize(new Dimension(120,50));
-        text.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyPressed(KeyEvent e) {
-                int key = KeyEvent.VK_ENTER;
-                if(e.getKeyCode() == key) {
-                    userInput = text.getText().trim();
-                    if(!userInput.equals("Message") && !userInput.isEmpty()) {
-                        System.out.println(userInput);
-                        text.setText(null);
-                    }
-                }
-            }
-        });
-        text.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                text.setForeground(new Color(255,255,255));
-                text.setText(null);
-                textfieldMouseClicked(e);
-            }
-        });
-        text.addFocusListener(new java.awt.event.FocusAdapter() {
-            @Override
-            public void focusLost (java.awt.event.FocusEvent evt) {
-                text.setForeground(new Color(255,255,255,128));
-                textfieldFocusLost(evt);
-            }
-        });
-
-        sendButton = new JButton();
-        sendButton.setBounds(5,5,30,25);
-        sendButton.setBorder(new RoundedButton(20));
-        sendButton.setPreferredSize(new Dimension(20,50));
-        sendButton.setOpaque(false);
-        sendButton.addActionListener(e -> {
-            userInput = text.getText().trim();
-            if(!userInput.equals("Message") && !userInput.isEmpty()) {
-                System.out.println(userInput);
-                text.setText(null);
-            }
-        });
-
-
-        chatWindow = new JLabel();
-        chatWindow.setBackground(Color.decode("#2e2925"));
-        chatWindow.setOpaque(true);
-        chatWindow.setVisible(true);
+        frame.setIconImage(chatIcon.getImage());
+        frame.setUndecorated(true);
+        frame.getRootPane().setBorder(null);
+        frame.setShape(new RoundRectangle2D.Double(5,5 , frame.getWidth(), frame.getHeight(), 20, 20));
+        frame.setBackground(new Color(18, 17, 19, 90));
 
 
         customFont();
-
-        text.setBounds(50,700,420,40);
-        sendButton.setBounds(480, 700, 70, 40);
-        chatWindow.setBounds(20, 20, 540, 630);
-        text.setBackground(Color.decode("#33313b"));
-        text.setForeground(new Color(255,255,255,128));
-        text.setFont(Montserrat);
-        sendButton.setOpaque(true);
-        sendButton.setContentAreaFilled(true);
-        sendButton.setBorderPainted(false);
-        sendButton.setBackground(Color.decode("#33313b"));
-        sendButton.setForeground(Color.WHITE);
-        sendButton.setFont(Montserrat.deriveFont(10f));
+        textField = new TextField(20, this);
+        textField.setBounds(50, 700, 420, 40);
+        textField.setFont(Montserrat);
 
 
-        frame.add(panel);
-        panel.add(text);
-        panel.add(sendButton);
-        panel.add(chatWindow);
+        scrollPanel = new JScrollPane (chatWindow);
+        scrollPanel.setLayout(null);
+        scrollPanel.setBounds(0, 0, windowWidth, windowHeight);
+        scrollPanel.setBackground(new Color(18, 17, 19, 90));
+
+        closeButton = new CloseButton();
+        closeButton.setBounds(565, 15, 20, 20);
+        closeButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                frame.dispose();
+                super.mouseClicked(e);
+            }
+        });
+
+        minimizeButton = new MinimizeButton();
+        minimizeButton.setBounds(535, 15, 20, 20);
+        minimizeButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                frame.setExtendedState(frame.ICONIFIED);
+                super.mouseClicked(e);
+            }
+        });
+
+        sendButton = new SendButton();
+        sendButton.setBounds(480, 700, 40, 40);
+        sendButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                userInput = textField.getText().trim();
+                if (!userInput.equals("Message") && !userInput.isEmpty()) {
+                    System.out.println(userInput);
+                    textField.setText("");
+                    super.mouseClicked(e);
+                }
+            }
+        });
+
+
+        frame.add(scrollPanel);
+        scrollPanel.add(textField);
+        scrollPanel.add(sendButton);
+        scrollPanel.add(closeButton);
+        scrollPanel.add(minimizeButton);
         frame.setVisible(true);
     }
 
     public void customFont() {
         try {
-            Montserrat = Font.createFont(Font.TRUETYPE_FONT, new File("src/Montserrat-Regular.ttf")).deriveFont(15f);
+            Montserrat = Font.createFont(Font.TRUETYPE_FONT, new File("src/assets/Montserrat-Regular.ttf")).deriveFont(15f);
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, new File("src/Montserrat-Regular.ttf")));
-        }
-        catch(IOException | FontFormatException e) {
+            ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, new File("src/assets/Montserrat-Regular.ttf")));
+        } catch (IOException | FontFormatException e) {
 
         }
-    }
 
-    public void textfieldMouseClicked(java.awt.event.MouseEvent evt) {
 
-        if (key == KeyEvent.VK_ENTER) {
-            System.out.println("Hallo");
-        }
-        text.setText(null);
-    }
-
-    public void textfieldFocusLost(java.awt.event.FocusEvent evt) {
-        if(text.getText().trim().isEmpty()) {
-            text.setText("Message");
-        }
     }
 }
 
